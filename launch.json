@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Remote Attach (Surgical)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/services/surgical",
+                    "remoteRoot": "/app/surgical"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs",
+                    "remoteRoot": "/app/libs"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/services/sso",
+                    "remoteRoot": "/app/sso"
+                }
+            ],
+            "justMyCode": true
+        }
+    ]
+}
+

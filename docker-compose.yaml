@@ -1,0 +1,129 @@
+x-common: &common
+  build: &common-build
+    context: .
+    args:
+      - UV_NO_EDITABLE=0
+  env_file:
+    - .env
+  environment:
+    - PYTHONUNBUFFERED=1
+  networks:
+    - default
+  depends_on:
+    - db
+    - nginx
+
+services:
+  db:
+    build:
+      dockerfile: db.Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 15432:15432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    command: >
+      -p 15432
+      -c log_destination=stderr
+      -c log_statement=none
+      -c log_connections=off
+      -c log_disconnections=off
+      -c shared_preload_libraries=pg_cron
+
+  sso:
+    <<: *common
+    build:
+      <<: *common-build
+      dockerfile: services/sso/Dockerfile
+    image: sso
+    container_name: sso
+    ports:
+      - 8000:8000
+    volumes:
+      - ./libs:/app/libs
+      - ./services/sso:/app/sso
+      - $HOME/.aws/:/root/.aws:ro
+    command: ["-m", "uvicorn", "sso.main:app", "--host", "0.0.0.0", "--reload"]
+    user: root
+
+  # opereco:
+  #   <<: *common
+  #   build:
+  #     <<: *common-build
+  #     dockerfile: services/opereco/Dockerfile
+  #   image: opereco
+  #   container_name: opereco
+  #   ports:
+  #     - 8001:8000
+  #   volumes:
+  #     - ./services/opereco:/app/opereco
+  #     - ./libs:/app/libs
+  #     - $HOME/.aws/:/root/.aws:ro
+  #   command: ["-m", "uvicorn", "opereco.main:app", "--host", "0.0.0.0", "--reload"]
+  #   user: root
+
+  surgical:
+    <<: *common
+    build:
+      <<: *common-build
+      dockerfile: services/surgical/Dockerfile
+    image: surgical
+    container_name: surgical
+    ports:
+      - 8002:8000
+      - 5678:5678
+    volumes:
+      - ./services/surgical:/app/surgical
+      - ./libs:/app/libs
+      - ./services/sso:/app/sso
+      - $HOME/.aws/:/root/.aws:ro
+    command:
+      [
+        "-m",
+        "debugpy",
+        "--listen",
+        "0.0.0.0:5678",
+        "-m",
+        "uvicorn",
+        "surgical.main:app",
+        "--host",
+        "0.0.0.0",
+        "--reload",
+      ]
+    user: root
+
+  # reflet:
+  #   <<: *common
+  #   build:
+  #     <<: *common-build
+  #     dockerfile: services/reflet/Dockerfile
+  #   image: reflet
+  #   container_name: reflet
+  #   ports:
+  #     - 8003:8000
+  #   volumes:
+  #     - ./services/reflet:/app/reflet
+  #     - ./libs:/app/libs
+  #     - ./services/sso:/app/sso
+  #     - $HOME/.aws/:/root/.aws:ro
+  #   command:
+  #     ["-m", "uvicorn", "reflet.main:app", "--host", "0.0.0.0", "--reload"]
+  #   user: root
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy_headers.conf:/etc/nginx/proxy_headers.conf
+
+volumes:
+  postgres:
+
+networks:
+  default:
+    driver: bridge

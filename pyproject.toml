@@ -1,0 +1,29 @@
+[project]
+name = "surgical"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "debugpy>=1.8.12",
+  "email-validator>=2.2.0",
+  "fastapi-filter[sqlalchemy]>=2.0.1",
+  "fastapi-pagination[sqlalchemy]>=0.12.34",
+  "opencv-python-headless>=4.11.0.86",
+  "python-multipart>=0.0.20",
+  "qt-anyflow",
+  "qt-aws",
+  "qt-common",
+  "qt-encryption",
+  "qt-firebase",
+  "qt-oauth2",
+  "uvicorn>=0.34.0",
+]
+
+[tool.uv.sources]
+qt-anyflow = { workspace = true }
+qt-aws = { workspace = true }
+qt-common = { workspace = true }
+qt-encryption = { workspace = true }
+qt-oauth2 = { workspace = true }
+qt-firebase = { workspace = true }
