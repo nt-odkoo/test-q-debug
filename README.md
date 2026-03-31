@@ -1,5 +1,10 @@
 # test-q-debug
 
+Don't forget this command.
+```
+uv lock
+```
+
 ```
 diff --git a/docker-compose.yaml b/docker-compose.yaml
 index 45ead7a..4646012 100644
